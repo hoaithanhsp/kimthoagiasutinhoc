@@ -1,0 +1,51 @@
+BÁO CÁO SẢN PHẨM: GIA SƯ TIN HỌC PRO
+Hệ thống Hỗ trợ Học tập môn Tin học thông minh với AI
+
+I. THÔNG TIN CHUNG
+- Tên sản phẩm: GIA SƯ TIN HỌC PRO
+- Tác giả: Trần Thị Kim Thoa
+- Đơn vị công tác: Trường THPT Hoàng Diệu
+- Địa chỉ: Số 1 Mạc Đĩnh Chi, phường Phú Lợi, thành phố Cần Thơ
+- Năm thực hiện: 2026
+
+II. LÝ DO CHỌN ĐỀ TÀI
+Trong kỷ nguyên số 4.0, Tin học đã trở thành môn học nền tảng và thiết yếu. Tuy nhiên, việc học lập trình và tư duy máy tính đôi khi còn khô khan và khó tiếp cận đối với nhiều học sinh. Bên cạnh đó, các nguồn tài liệu ôn tập trực tuyến thường tản mát và chưa được hệ thống hóa bài bản.
+
+Xuất phát từ thực tế đó, tôi đã xây dựng "Gia Sư Tin Học Pro" - một ứng dụng web tích hợp trí tuệ nhân tạo (AI) để đồng hành cùng học sinh trong quá trình chinh phục môn Tin học, từ những kiến thức cơ bản nhất ở Tiểu học đến các bài toán lập trình phức tạp ở cấp THPT.
+
+III. TÍNH NĂNG NỔI BẬT
+
+1. Hệ thống chương trình chuẩn hóa 12 lớp
+- Ứng dụng bao phủ toàn bộ chương trình Tin học phổ thông mới (GDPT 2018).
+- Dữ liệu được chia nhỏ theo từng cấp học, lớp học và chủ đề cụ thể, giúp học sinh dễ dàng tra cứu và ôn tập.
+  + Tiểu học: Tập trung vào kỹ năng sử dụng máy tính, gõ phím, phần mềm văn phòng cơ bản.
+  + THCS: Phát triển tư duy thuật toán, ngôn ngữ lập trình cơ bản (Python, Pascal).
+  + THPT: Đi sâu vào Khoa học máy tính, Hệ quản trị CSDL, Lập trình hướng đối tượng, Công nghệ Web.
+
+2. Công nghệ AI tiên tiến (Google Gemini)
+- Tạo đề thi thông minh: AI tự động sinh ra hàng nghìn câu hỏi trắc nghiệm khác nhau, không trùng lặp, đảm bảo tính đa dạng và bám sát chủ đề đã chọn.
+- Phân loại độ khó: Câu hỏi được phân bổ hợp lý theo các mức độ Nhận biết, Thông hiểu và Vận dụng.
+- Giải thích chi tiết: Sau mỗi câu trả lời, AI cung cấp lời giải thích cặn kẽ, giúp học sinh hiểu bản chất vấn đề chứ không chỉ học vẹt.
+
+3. Trợ lý ảo "Thầy Tin AI"
+- Hoạt động 24/7, sẵn sàng giải đáp mọi thắc mắc của học sinh.
+- Hỗ trợ giải bài tập thông qua hình ảnh (OCR), giúp học sinh gỡ rối khi gặp bài khó.
+- Phương pháp sư phạm gợi mở, khuyến khích tư duy.
+
+4. Giao diện thân thiện và hiện đại
+- Thiết kế đẹp mắt, màu sắc phù hợp với tâm lý lứa tuổi học sịnh.
+- Tương thích tốt trên mọi thiết bị (Máy tính, Máy tính bảng, Điện thoại).
+- Chế độ "Lịch sử" giúp học sinh xem lại kết quả và theo dõi tiến bộ của bản thân.
+
+IV. HIỆU QUẢ VÀ ỨNG DỤNG
+- Đối với học sinh: Tạo hứng thú học tập, giúp việc ôn thi trở nên nhẹ nhàng và hiệu quả hơn. Khuyến khích tinh thần tự học.
+- Đối với giáo viên: Là công cụ hỗ trợ đắc lực trong việc ra đề kiểm tra, đánh giá năng lực học sinh.
+- Đối với nhà trường: Góp phần đẩy mạnh chuyển đổi số trong giáo dục.
+
+V. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
+Sản phẩm "Gia Sư Tin Học Pro" bước đầu đã hoàn thiện các tính năng cơ bản và nhận được phản hồi tích cực. Trong tương lai, tôi dự định sẽ phát triển thêm các tính năng như:
+- Chế độ thi đấu online (Battle Mode).
+- Tích hợp thêm nhiều ngôn ngữ lập trình (C++, Java).
+- Hệ thống gợi ý lộ trình học tập dựa trên phân tích dữ liệu AI.
+
+Sản phẩm là tâm huyết của tác giả với mong muốn đóng góp một phần nhỏ bé vào sự nghiệp giáo dục Tin học nước nhà.

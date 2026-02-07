@@ -1,0 +1,842 @@
+🎯 Tổng Quan
+Database này được thiết kế cho app Gia Sư Tin Học, bao gồm toàn bộ chương trình Tin học từ Tiểu học đến THPT theo chương trình của Bộ Giáo dục Việt Nam.
+
+Cấu Trúc Database
+Plain Text
+
+📚 CẤP HỌC (3 cấp)
+  └── 📖 LỚP HỌC (12 lớp: 1-12)
+      └── 📑 HỌC KỲ (2 học kỳ/năm)
+          └── 📝 CHỦ ĐỀ (Topics)
+              └── 📄 BÀI HỌC (Lessons)
+                  └── 💡 KỸ NĂNG (Skills)
+                  └── 📋 BÀI TẬP (Exercises)
+                  └── 🎯 DỰ ÁN (Projects)
+📊 I. DATABASE SCHEMA
+1. Bảng: school_levels (Cấp học)
+SQL
+
+CREATE TABLE school_levels (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(20) UNIQUE NOT NULL,        -- 'primary', 'secondary', 'high_school'
+  name_vn VARCHAR(50) NOT NULL,            -- 'Tiểu học', 'THCS', 'THPT'
+  name_en VARCHAR(50) NOT NULL,            -- 'Primary', 'Secondary', 'High School'
+  grade_range VARCHAR(10) NOT NULL,        -- '1-5', '6-9', '10-12'
+  description TEXT,
+  icon VARCHAR(10),                        -- '📚', '🎓', '🏆'
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+2. Bảng: grades (Lớp học)
+SQL
+
+CREATE TABLE grades (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  grade_number INT NOT NULL,               -- 1-12
+  school_level_id INT NOT NULL,
+  name_vn VARCHAR(50) NOT NULL,            -- 'Lớp 1', 'Lớp 6', 'Lớp 10'
+  name_en VARCHAR(50) NOT NULL,            -- 'Grade 1', 'Grade 6', 'Grade 10'
+  age_range VARCHAR(10),                   -- '6-7', '11-12', '15-16'
+  total_lessons INT DEFAULT 0,
+  total_hours INT DEFAULT 0,
+  FOREIGN KEY (school_level_id) REFERENCES school_levels(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+3. Bảng: semesters (Học kỳ)
+SQL
+
+CREATE TABLE semesters (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  grade_id INT NOT NULL,
+  semester_number INT NOT NULL,            -- 1 hoặc 2
+  name_vn VARCHAR(50) NOT NULL,            -- 'Học kỳ 1', 'Học kỳ 2'
+  name_en VARCHAR(50) NOT NULL,            -- 'Semester 1', 'Semester 2'
+  start_month INT,                         -- 9 (tháng 9) hoặc 1 (tháng 1)
+  end_month INT,                           -- 12 hoặc 5
+  total_weeks INT DEFAULT 18,
+  FOREIGN KEY (grade_id) REFERENCES grades(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+4. Bảng: topics (Chủ đề)
+SQL
+
+CREATE TABLE topics (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  semester_id INT NOT NULL,
+  topic_code VARCHAR(20) UNIQUE NOT NULL,  -- 'G1_S1_T1', 'G6_S2_T3'
+  title_vn VARCHAR(200) NOT NULL,          -- 'Làm quen với máy tính'
+  title_en VARCHAR(200) NOT NULL,          -- 'Introduction to Computer'
+  description TEXT,
+  order_index INT DEFAULT 0,               -- Thứ tự trong học kỳ
+  estimated_hours INT DEFAULT 0,           -- Số giờ học dự kiến
+  difficulty_level ENUM('beginner', 'intermediate', 'advanced') DEFAULT 'beginner',
+  icon VARCHAR(50),                        -- '💻', '🖱️', '⌨️'
+  FOREIGN KEY (semester_id) REFERENCES semesters(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+5. Bảng: lessons (Bài học)
+SQL
+
+CREATE TABLE lessons (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  topic_id INT NOT NULL,
+  lesson_code VARCHAR(30) UNIQUE NOT NULL, -- 'G1_S1_T1_L1'
+  title_vn VARCHAR(200) NOT NULL,
+  title_en VARCHAR(200) NOT NULL,
+  description TEXT,
+  content_markdown TEXT,                   -- Nội dung bài học (Markdown)
+  order_index INT DEFAULT 0,
+  estimated_minutes INT DEFAULT 45,        -- Thời gian học (phút)
+  difficulty_level ENUM('easy', 'medium', 'hard') DEFAULT 'easy',
+  video_url VARCHAR(500),                  -- Link video bài giảng
+  thumbnail_url VARCHAR(500),
+  is_free BOOLEAN DEFAULT TRUE,            -- Bài học miễn phí hay trả phí
+  FOREIGN KEY (topic_id) REFERENCES topics(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+6. Bảng: skills (Kỹ năng)
+SQL
+
+CREATE TABLE skills (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  skill_code VARCHAR(30) UNIQUE NOT NULL,  -- 'MOUSE_BASIC', 'TYPING_10FINGER'
+  name_vn VARCHAR(200) NOT NULL,           -- 'Sử dụng chuột cơ bản'
+  name_en VARCHAR(200) NOT NULL,           -- 'Basic Mouse Skills'
+  category ENUM('hardware', 'software', 'programming', 'internet', 'office', 'design', 'other') DEFAULT 'other',
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+7. Bảng: lesson_skills (Kỹ năng của bài học)
+SQL
+
+CREATE TABLE lesson_skills (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  lesson_id INT NOT NULL,
+  skill_id INT NOT NULL,
+  proficiency_level ENUM('basic', 'intermediate', 'advanced') DEFAULT 'basic',
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id),
+  FOREIGN KEY (skill_id) REFERENCES skills(id),
+  UNIQUE KEY (lesson_id, skill_id)
+);
+8. Bảng: exercises (Bài tập)
+SQL
+
+CREATE TABLE exercises (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  lesson_id INT NOT NULL,
+  exercise_code VARCHAR(30) UNIQUE NOT NULL,
+  title_vn VARCHAR(200) NOT NULL,
+  title_en VARCHAR(200) NOT NULL,
+  description TEXT,
+  type ENUM('multiple_choice', 'true_false', 'fill_blank', 'coding', 'practical', 'project') DEFAULT 'multiple_choice',
+  difficulty_level ENUM('easy', 'medium', 'hard') DEFAULT 'easy',
+  estimated_minutes INT DEFAULT 15,
+  points INT DEFAULT 10,                   -- Điểm tối đa
+  order_index INT DEFAULT 0,
+  FOREIGN KEY (lesson_id) REFERENCES lessons(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+9. Bảng: exercise_questions (Câu hỏi bài tập)
+SQL
+
+CREATE TABLE exercise_questions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  exercise_id INT NOT NULL,
+  question_text TEXT NOT NULL,
+  question_type ENUM('multiple_choice', 'true_false', 'fill_blank', 'coding', 'essay') NOT NULL,
+  correct_answer TEXT,                     -- Đáp án đúng (JSON cho multiple choice)
+  explanation TEXT,                        -- Giải thích đáp án
+  points INT DEFAULT 1,
+  order_index INT DEFAULT 0,
+  FOREIGN KEY (exercise_id) REFERENCES exercises(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+10. Bảng: projects (Dự án)
+SQL
+
+CREATE TABLE projects (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  topic_id INT NOT NULL,
+  project_code VARCHAR(30) UNIQUE NOT NULL,
+  title_vn VARCHAR(200) NOT NULL,
+  title_en VARCHAR(200) NOT NULL,
+  description TEXT,
+  objectives TEXT,                         -- Mục tiêu dự án
+  requirements TEXT,                       -- Yêu cầu (JSON)
+  estimated_hours INT DEFAULT 2,
+  difficulty_level ENUM('easy', 'medium', 'hard') DEFAULT 'medium',
+  sample_code TEXT,                        -- Code mẫu (nếu có)
+  sample_output_url VARCHAR(500),          -- Link demo kết quả mẫu
+  rubric TEXT,                             -- Tiêu chí chấm điểm (JSON)
+  FOREIGN KEY (topic_id) REFERENCES topics(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+📚 II. DỮ LIỆU MẪU - CẤP TIỂU HỌC (LỚP 1-5)
+LỚP 1 - HỌC KỲ 1
+Chủ đề 1: Làm Quen Với Máy Tính
+Bài 1: Máy tính là gì?
+
+Nội dung: Giới thiệu máy tính, các bộ phận cơ bản (màn hình, bàn phím, chuột)
+Kỹ năng: Nhận biết các bộ phận máy tính
+Bài tập: Nối tên với hình ảnh các bộ phận
+Bài 2: Bật và tắt máy tính đúng cách
+
+Nội dung: Hướng dẫn bật/tắt máy an toàn
+Kỹ năng: Thao tác bật/tắt máy
+Bài tập: Sắp xếp các bước bật máy đúng thứ tự
+Bài 3: Sử dụng chuột
+
+Nội dung: Cách cầm chuột, click, double-click, kéo thả
+Kỹ năng: Thao tác chuột cơ bản
+Bài tập: Trò chơi luyện click chuột
+Bài 4: Làm quen với bàn phím
+
+Nội dung: Các phím cơ bản (chữ cái, số, Enter, Space)
+Kỹ năng: Nhận biết phím trên bàn phím
+Bài tập: Tìm và nhấn các phím theo yêu cầu
+Chủ đề 2: Vẽ Tranh Trên Máy Tính
+Bài 5: Làm quen với Paint
+
+Nội dung: Mở phần mềm Paint, giao diện cơ bản
+Kỹ năng: Mở và đóng phần mềm
+Bài tập: Mở Paint và nhận diện các công cụ
+Bài 6: Vẽ hình cơ bản
+
+Nội dung: Vẽ đường thẳng, hình tròn, hình vuông
+Kỹ năng: Sử dụng công cụ vẽ hình
+Bài tập: Vẽ ngôi nhà đơn giản
+Bài 7: Tô màu
+
+Nội dung: Chọn màu, tô màu cho hình vẽ
+Kỹ năng: Sử dụng công cụ tô màu
+Bài tập: Tô màu tranh theo mẫu
+Bài 8: Lưu và mở file
+
+Nội dung: Lưu bản vẽ, mở lại bản vẽ đã lưu
+Kỹ năng: Quản lý file cơ bản
+Bài tập: Lưu tranh với tên riêng
+Dự án học kỳ 1: Vẽ tranh "Gia đình em" bằng Paint
+
+LỚP 1 - HỌC KỲ 2
+Chủ đề 3: Gõ Chữ Trên Máy Tính
+Bài 9: Gõ chữ cái
+
+Nội dung: Mở Notepad, gõ chữ cái tiếng Việt
+Kỹ năng: Gõ chữ cái đơn giản
+Bài tập: Gõ tên của mình
+Bài 10: Gõ số và dấu câu
+
+Nội dung: Gõ số 0-9, dấu chấm, dấu phẩy
+Kỹ năng: Gõ số và dấu câu
+Bài tập: Gõ số điện thoại nhà
+Bài 11: Xóa và sửa chữ
+
+Nội dung: Phím Delete, Backspace, sửa lỗi gõ
+Kỹ năng: Chỉnh sửa văn bản
+Bài tập: Sửa câu có lỗi
+Bài 12: Lưu bài viết
+
+Nội dung: Lưu file văn bản
+Kỹ năng: Lưu file .txt
+Bài tập: Viết và lưu bài văn ngắn
+Chủ đề 4: Trò Chơi Học Tập
+Bài 13: Trò chơi toán học
+
+Nội dung: Chơi game toán học trên máy
+Kỹ năng: Kết hợp máy tính với học tập
+Bài tập: Hoàn thành 10 phép tính
+Bài 14: Trò chơi ghép hình
+
+Nội dung: Chơi game puzzle
+Kỹ năng: Tư duy logic
+Bài tập: Ghép hình hoàn chỉnh
+Bài 15: An toàn khi dùng máy tính
+
+Nội dung: Ngồi đúng tư thế, bảo vệ mắt, thời gian sử dụng hợp lý
+Kỹ năng: Ý thức an toàn sức khỏe
+Bài tập: Trắc nghiệm về an toàn
+Dự án học kỳ 2: Viết và vẽ tranh về "Ngày của em"
+
+LỚP 2 - HỌC KỲ 1
+Chủ đề 1: Gõ Phím Nâng Cao
+Bài 1: Gõ 10 ngón cơ bản
+
+Nội dung: Vị trí đặt tay, gõ các phím hàng giữa (ASDF JKL;)
+Kỹ năng: Gõ 10 ngón hàng giữa
+Bài tập: Luyện gõ hàng ASDF JKL;
+Bài 2: Gõ hàng trên và hàng dưới
+
+Nội dung: Gõ QWERT YUIOP và ZXCVBNM
+Kỹ năng: Gõ 10 ngón đầy đủ
+Bài tập: Gõ các từ đơn giản
+Bài 3: Gõ tiếng Việt có dấu
+
+Nội dung: Cài đặt bộ gõ tiếng Việt, gõ dấu thanh
+Kỹ năng: Gõ tiếng Việt
+Bài tập: Gõ câu tiếng Việt có dấu
+Bài 4: Tăng tốc độ gõ
+
+Nội dung: Luyện tập gõ nhanh, chính xác
+Kỹ năng: Gõ phím thành thạo
+Bài tập: Thi gõ phím (10 từ/phút)
+Chủ đề 2: Làm Việc Với Thư Mục và File
+Bài 5: Tạo thư mục
+
+Nội dung: Tạo folder mới, đặt tên
+Kỹ năng: Quản lý thư mục
+Bài tập: Tạo thư mục "Bài tập của em"
+Bài 6: Sao chép và di chuyển file
+
+Nội dung: Copy, Cut, Paste file
+Kỹ năng: Thao tác với file
+Bài tập: Sắp xếp file vào đúng thư mục
+Bài 7: Đổi tên và xóa file
+
+Nội dung: Rename, Delete, Recycle Bin
+Kỹ năng: Quản lý file nâng cao
+Bài tập: Dọn dẹp thư mục
+Bài 8: Tìm kiếm file
+
+Nội dung: Sử dụng thanh tìm kiếm Windows
+Kỹ năng: Tìm file nhanh
+Bài tập: Tìm file theo tên
+Dự án học kỳ 1: Tổ chức thư mục "Học tập của em" (Toán, Tiếng Việt, Tin học)
+
+LỚP 2 - HỌC KỲ 2
+Chủ đề 3: Làm Quen Với Word
+Bài 9: Mở và giao diện Word
+
+Nội dung: Mở Microsoft Word, các thành phần giao diện
+Kỹ năng: Nhận biết giao diện Word
+Bài tập: Tìm các công cụ trên thanh Ribbon
+Bài 10: Gõ văn bản trong Word
+
+Nội dung: Gõ đoạn văn, xuống dòng, căn lề
+Kỹ năng: Soạn thảo văn bản cơ bản
+Bài tập: Gõ bài thơ
+Bài 11: Định dạng chữ
+
+Nội dung: Đổi font, cỡ chữ, màu chữ, in đậm, in nghiêng
+Kỹ năng: Định dạng văn bản
+Bài tập: Làm đẹp bài thơ
+Bài 12: Chèn hình ảnh
+
+Nội dung: Insert hình ảnh vào văn bản
+Kỹ năng: Kết hợp text và hình
+Bài tập: Viết và minh họa câu chuyện
+Chủ đề 4: Internet An Toàn
+Bài 13: Internet là gì?
+
+Nội dung: Giới thiệu Internet, web browser
+Kỹ năng: Hiểu khái niệm Internet
+Bài tập: Trắc nghiệm về Internet
+Bài 14: Tìm kiếm trên Google
+
+Nội dung: Mở Google, gõ từ khóa tìm kiếm
+Kỹ năng: Tìm kiếm thông tin
+Bài tập: Tìm hình ảnh con vật yêu thích
+Bài 15: An toàn trên Internet
+
+Nội dung: Không chia sẻ thông tin cá nhân, không nói chuyện với người lạ
+Kỹ năng: Ý thức an toàn mạng
+Bài tập: Tình huống an toàn Internet
+Dự án học kỳ 2: Làm thiệp chúc mừng bằng Word (có hình ảnh và chữ đẹp)
+
+LỚP 3-5: Tóm Tắt Chủ Đề Chính
+Lớp 3:
+
+Học kỳ 1: Word nâng cao (bảng, danh sách), PowerPoint cơ bản
+Học kỳ 2: Vẽ nâng cao (Paint 3D), Email cơ bản
+Lớp 4:
+
+Học kỳ 1: PowerPoint nâng cao, Excel cơ bản (nhập liệu, tính toán đơn giản)
+Học kỳ 2: Scratch cơ bản (lập trình kéo thả)
+Lớp 5:
+
+Học kỳ 1: Scratch nâng cao (game đơn giản), Tìm kiếm và đánh giá thông tin
+Học kỳ 2: Dự án tổng hợp (trình bày về chủ đề tự chọn)
+📚 III. DỮ LIỆU MẪU - CẤP THCS (LỚP 6-9)
+LỚP 6 - HỌC KỲ 1
+Chủ đề 1: Thông Tin và Dữ Liệu
+Bài 1: Thông tin trong cuộc sống
+
+Nội dung: Khái niệm thông tin, vai trò của thông tin
+Kỹ năng: Hiểu về thông tin
+Bài tập: Phân loại các loại thông tin
+Bài 2: Dữ liệu số
+
+Nội dung: Số nhị phân, chuyển đổi số
+Kỹ năng: Tính toán số nhị phân
+Bài tập: Chuyển đổi số thập phân sang nhị phân
+Bài 3: Đơn vị đo dữ liệu
+
+Nội dung: Bit, Byte, KB, MB, GB, TB
+Kỹ năng: Tính toán dung lượng
+Bài tập: So sánh dung lượng file
+Bài 4: Nén và giải nén file
+
+Nội dung: Sử dụng WinRAR/7-Zip
+Kỹ năng: Nén và giải nén
+Bài tập: Nén thư mục bài tập
+Chủ đề 2: Thuật Toán và Lập Trình
+Bài 5: Thuật toán là gì?
+
+Nội dung: Định nghĩa, đặc điểm thuật toán
+Kỹ năng: Tư duy thuật toán
+Bài tập: Viết thuật toán đơn giản (pha trà)
+Bài 6: Biểu diễn thuật toán
+
+Nội dung: Lưu đồ, mã giả
+Kỹ năng: Vẽ lưu đồ
+Bài tập: Vẽ lưu đồ tính tổng 2 số
+Bài 7: Scratch - Biến và phép toán
+
+Nội dung: Tạo biến, phép tính cơ bản
+Kỹ năng: Lập trình biến
+Bài tập: Tính diện tích hình chữ nhật
+Bài 8: Scratch - Cấu trúc rẽ nhánh
+
+Nội dung: If-else trong Scratch
+Kỹ năng: Lập trình điều kiện
+Bài tập: Kiểm tra số chẵn lẻ
+Dự án học kỳ 1: Làm game đơn giản bằng Scratch (bắt bóng)
+
+LỚP 6 - HỌC KỲ 2
+Chủ đề 3: Mạng Máy Tính và Internet
+Bài 9: Mạng máy tính
+
+Nội dung: LAN, WAN, Internet
+Kỹ năng: Hiểu về mạng
+Bài tập: Vẽ sơ đồ mạng LAN
+Bài 10: Duyệt web hiệu quả
+
+Nội dung: Bookmark, lịch sử, tab
+Kỹ năng: Sử dụng browser nâng cao
+Bài tập: Tổ chức bookmark theo chủ đề
+Bài 11: Email nâng cao
+
+Nội dung: Gửi file đính kèm, CC, BCC
+Kỹ năng: Giao tiếp qua email
+Bài tập: Viết email gửi bài tập cho giáo viên
+Bài 12: An toàn mạng xã hội
+
+Nội dung: Quyền riêng tư, phòng chống bắt nạt mạng
+Kỹ năng: Ý thức an toàn
+Bài tập: Phân tích tình huống
+Chủ đề 4: Xử Lý Văn Bản Nâng Cao
+Bài 13: Word - Định dạng đoạn văn
+
+Nội dung: Căn lề, giãn dòng, thụt đầu dòng
+Kỹ năng: Trình bày văn bản chuyên nghiệp
+Bài tập: Trình bày bài văn theo quy chuẩn
+Bài 14: Word - Bảng biểu
+
+Nội dung: Tạo bảng, merge cells, định dạng bảng
+Kỹ năng: Làm việc với bảng
+Bài tập: Làm thời khóa biểu
+Bài 15: Word - Header, Footer, Page Number
+
+Nội dung: Thêm đầu trang, chân trang, số trang
+Kỹ năng: Định dạng tài liệu
+Bài tập: Làm bìa báo cáo
+Dự án học kỳ 2: Viết báo cáo nghiên cứu nhỏ (5 trang) về chủ đề tự chọn
+
+LỚP 7-9: Tóm Tắt Chủ Đề Chính
+Lớp 7:
+
+Học kỳ 1: Excel (hàm SUM, AVERAGE, IF), Lập trình Scratch nâng cao
+Học kỳ 2: PowerPoint nâng cao (animation, transition), Thiết kế đồ họa cơ bản
+Lớp 8:
+
+Học kỳ 1: Python cơ bản (biến, vòng lặp, hàm), Cơ sở dữ liệu (khái niệm)
+Học kỳ 2: Python nâng cao (list, dictionary), Dự án Python nhỏ
+Lớp 9:
+
+Học kỳ 1: Web cơ bản (HTML, CSS), Thiết kế trang web tĩnh
+Học kỳ 2: JavaScript cơ bản, Dự án web hoàn chỉnh
+📚 IV. DỮ LIỆU MẪU - CẤP THPT (LỚP 10-12)
+LỚP 10 - HỌC KỲ 1
+Chủ đề 1: Hệ Thống Máy Tính
+Bài 1: Kiến trúc máy tính
+
+Nội dung: CPU, RAM, ROM, Storage
+Kỹ năng: Hiểu cấu trúc máy tính
+Bài tập: So sánh cấu hình máy tính
+Bài 2: Hệ điều hành
+
+Nội dung: Windows, Linux, macOS
+Kỹ năng: Quản lý hệ thống
+Bài tập: Cài đặt phần mềm, quản lý Task Manager
+Bài 3: Mạng và bảo mật
+
+Nội dung: IP, DNS, Firewall, Antivirus
+Kỹ năng: Bảo mật máy tính
+Bài tập: Cấu hình bảo mật cơ bản
+Chủ đề 2: Lập Trình Python Nâng Cao
+Bài 4: Cấu trúc dữ liệu
+
+Nội dung: List, Tuple, Set, Dictionary
+Kỹ năng: Làm việc với dữ liệu phức tạp
+Bài tập: Quản lý danh sách học sinh
+Bài 5: File I/O
+
+Nội dung: Đọc/ghi file text, CSV
+Kỹ năng: Xử lý file
+Bài tập: Đọc và phân tích dữ liệu từ file
+Bài 6: Thư viện và Module
+
+Nội dung: Import, pip, thư viện phổ biến
+Kỹ năng: Sử dụng thư viện
+Bài tập: Vẽ đồ thị với matplotlib
+Bài 7-8: OOP cơ bản
+
+Nội dung: Class, Object, Inheritance
+Kỹ năng: Lập trình hướng đối tượng
+Bài tập: Tạo class quản lý sinh viên
+Dự án học kỳ 1: Ứng dụng quản lý thư viện sách (Python CLI)
+
+LỚP 10 - HỌC KỲ 2
+Chủ đề 3: Cơ Sở Dữ Liệu
+Bài 9: Giới thiệu CSDL
+
+Nội dung: DBMS, SQL, NoSQL
+Kỹ năng: Hiểu về database
+Bài tập: Thiết kế ERD đơn giản
+Bài 10: SQL cơ bản
+
+Nội dung: SELECT, WHERE, ORDER BY
+Kỹ năng: Truy vấn dữ liệu
+Bài tập: Viết câu truy vấn SQL
+Bài 11: SQL nâng cao
+
+Nội dung: JOIN, GROUP BY, HAVING
+Kỹ năng: Truy vấn phức tạp
+Bài tập: Phân tích dữ liệu bán hàng
+Bài 12: Python + SQLite
+
+Nội dung: Kết nối Python với database
+Kỹ năng: Tích hợp database
+Bài tập: CRUD với SQLite
+Chủ đề 4: Web Development Cơ Bản
+Bài 13: HTML5 nâng cao
+
+Nội dung: Semantic HTML, Forms, Media
+Kỹ năng: Cấu trúc web
+Bài tập: Tạo form đăng ký
+Bài 14: CSS3 nâng cao
+
+Nội dung: Flexbox, Grid, Responsive
+Kỹ năng: Thiết kế layout
+Bài tập: Tạo trang web responsive
+Bài 15: JavaScript cơ bản
+
+Nội dung: DOM manipulation, Events
+Kỹ năng: Tương tác web
+Bài tập: Tạo form validation
+Dự án học kỳ 2: Website cá nhân (portfolio) hoàn chỉnh
+
+LỚP 11-12: Tóm Tắt Chủ Đề Chính
+Lớp 11:
+
+Học kỳ 1: JavaScript nâng cao (ES6+, Async), React.js cơ bản
+Học kỳ 2: Backend cơ bản (Node.js/Flask), RESTful API
+Lớp 12:
+
+Học kỳ 1: Full-stack project, Git/GitHub, Deployment
+Học kỳ 2: AI/ML cơ bản (nếu có), Chuẩn bị thi THPT, Định hướng nghề nghiệp
+🎯 V. SKILLS TAXONOMY (Phân Loại Kỹ Năng)
+1. Hardware Skills (Phần cứng)
+HARDWARE_IDENTIFY: Nhận biết linh kiện
+HARDWARE_ASSEMBLE: Lắp ráp máy tính
+HARDWARE_TROUBLESHOOT: Khắc phục sự cố phần cứng
+2. Software Skills (Phần mềm)
+SOFTWARE_INSTALL: Cài đặt phần mềm
+SOFTWARE_WORD: Sử dụng Word
+SOFTWARE_EXCEL: Sử dụng Excel
+SOFTWARE_POWERPOINT: Sử dụng PowerPoint
+SOFTWARE_PAINT: Sử dụng Paint
+SOFTWARE_BROWSER: Sử dụng trình duyệt
+3. Programming Skills (Lập trình)
+PROG_ALGORITHM: Tư duy thuật toán
+PROG_SCRATCH: Lập trình Scratch
+PROG_PYTHON_BASIC: Python cơ bản
+PROG_PYTHON_OOP: Python OOP
+PROG_WEB_HTML: HTML
+PROG_WEB_CSS: CSS
+PROG_WEB_JS: JavaScript
+PROG_DATABASE_SQL: SQL
+4. Internet Skills (Internet)
+INTERNET_SEARCH: Tìm kiếm thông tin
+INTERNET_EMAIL: Sử dụng email
+INTERNET_SAFETY: An toàn mạng
+INTERNET_SOCIAL: Mạng xã hội
+5. Office Skills (Văn phòng)
+OFFICE_TYPING: Gõ phím 10 ngón
+OFFICE_FILE_MANAGE: Quản lý file
+OFFICE_DOCUMENT: Soạn thảo văn bản
+OFFICE_SPREADSHEET: Bảng tính
+OFFICE_PRESENTATION: Trình bày
+6. Design Skills (Thiết kế)
+DESIGN_GRAPHIC: Thiết kế đồ họa
+DESIGN_UI: Thiết kế giao diện
+DESIGN_VIDEO: Biên tập video
+📊 VI. SQL INSERT STATEMENTS MẪU
+Insert School Levels
+SQL
+
+INSERT INTO school_levels (code, name_vn, name_en, grade_range, icon) VALUES
+('primary', 'Tiểu học', 'Primary', '1-5', '📚'),
+('secondary', 'THCS', 'Secondary', '6-9', '🎓'),
+('high_school', 'THPT', 'High School', '10-12', '🏆');
+Insert Grades (Lớp 1-12)
+SQL
+
+INSERT INTO grades (grade_number, school_level_id, name_vn, name_en, age_range) VALUES
+(1, 1, 'Lớp 1', 'Grade 1', '6-7'),
+(2, 1, 'Lớp 2', 'Grade 2', '7-8'),
+(3, 1, 'Lớp 3', 'Grade 3', '8-9'),
+(4, 1, 'Lớp 4', 'Grade 4', '9-10'),
+(5, 1, 'Lớp 5', 'Grade 5', '10-11'),
+(6, 2, 'Lớp 6', 'Grade 6', '11-12'),
+(7, 2, 'Lớp 7', 'Grade 7', '12-13'),
+(8, 2, 'Lớp 8', 'Grade 8', '13-14'),
+(9, 2, 'Lớp 9', 'Grade 9', '14-15'),
+(10, 3, 'Lớp 10', 'Grade 10', '15-16'),
+(11, 3, 'Lớp 11', 'Grade 11', '16-17'),
+(12, 3, 'Lớp 12', 'Grade 12', '17-18');
+Insert Skills Mẫu
+SQL
+
+INSERT INTO skills (skill_code, name_vn, name_en, category) VALUES
+('MOUSE_BASIC', 'Sử dụng chuột cơ bản', 'Basic Mouse Skills', 'hardware'),
+('KEYBOARD_BASIC', 'Sử dụng bàn phím cơ bản', 'Basic Keyboard Skills', 'hardware'),
+('TYPING_10FINGER', 'Gõ phím 10 ngón', '10-Finger Typing', 'office'),
+('WORD_BASIC', 'Word cơ bản', 'Basic Word', 'office'),
+('WORD_ADVANCED', 'Word nâng cao', 'Advanced Word', 'office'),
+('EXCEL_BASIC', 'Excel cơ bản', 'Basic Excel', 'office'),
+('POWERPOINT_BASIC', 'PowerPoint cơ bản', 'Basic PowerPoint', 'office'),
+('PAINT_BASIC', 'Vẽ tranh cơ bản', 'Basic Painting', 'design'),
+('FILE_MANAGE', 'Quản lý file', 'File Management', 'software'),
+('INTERNET_SEARCH', 'Tìm kiếm trên Internet', 'Internet Search', 'internet'),
+('EMAIL_BASIC', 'Email cơ bản', 'Basic Email', 'internet'),
+('INTERNET_SAFETY', 'An toàn Internet', 'Internet Safety', 'internet'),
+('ALGORITHM_THINKING', 'Tư duy thuật toán', 'Algorithm Thinking', 'programming'),
+('SCRATCH_BASIC', 'Scratch cơ bản', 'Basic Scratch', 'programming'),
+('PYTHON_BASIC', 'Python cơ bản', 'Basic Python', 'programming'),
+('PYTHON_OOP', 'Python OOP', 'Python OOP', 'programming'),
+('HTML_BASIC', 'HTML cơ bản', 'Basic HTML', 'programming'),
+('CSS_BASIC', 'CSS cơ bản', 'Basic CSS', 'programming'),
+('JAVASCRIPT_BASIC', 'JavaScript cơ bản', 'Basic JavaScript', 'programming'),
+('SQL_BASIC', 'SQL cơ bản', 'Basic SQL', 'programming');
+🚀 VII. API ENDPOINTS ĐỀ XUẤT
+1. Lấy Danh Sách Lớp Học
+Plain Text
+
+GET /api/grades
+Response: [{ id, grade_number, name_vn, school_level, ... }]
+2. Lấy Chương Trình Học Theo Lớp
+Plain Text
+
+GET /api/grades/{grade_id}/curriculum
+Response: {
+  grade: {...},
+  semesters: [
+    {
+      semester: {...},
+      topics: [
+        {
+          topic: {...},
+          lessons: [...],
+          projects: [...]
+        }
+      ]
+    }
+  ]
+}
+3. Lấy Chi Tiết Bài Học
+Plain Text
+
+GET /api/lessons/{lesson_id}
+Response: {
+  lesson: {...},
+  skills: [...],
+  exercises: [...],
+  next_lesson: {...},
+  prev_lesson: {...}
+}
+4. Lấy Bài Tập
+Plain Text
+
+GET /api/exercises/{exercise_id}
+Response: {
+  exercise: {...},
+  questions: [...]
+}
+5. Nộp Bài Tập
+Plain Text
+
+POST /api/exercises/{exercise_id}/submit
+Body: {
+  student_id: "...",
+  answers: [...]
+}
+Response: {
+  score: 85,
+  correct_count: 17,
+  total_count: 20,
+  feedback: "..."
+}
+6. Lấy Tiến Độ Học Tập
+Plain Text
+
+GET /api/students/{student_id}/progress?grade_id={grade_id}
+Response: {
+  completed_lessons: 45,
+  total_lessons: 60,
+  completed_exercises: 38,
+  total_exercises: 55,
+  skills_acquired: [...],
+  current_topic: {...}
+}
+📱 VIII. TÍNH NĂNG APP ĐỀ XUẤT
+1. Cho Học Sinh
+✅ Xem chương trình học theo lớp
+✅ Học bài (video, text, interactive)
+✅ Làm bài tập (trắc nghiệm, code, thực hành)
+✅ Làm dự án
+✅ Theo dõi tiến độ học tập
+✅ Nhận chứng chỉ khi hoàn thành
+✅ Hỏi đáp với AI tutor
+2. Cho Giáo Viên
+✅ Xem danh sách học sinh
+✅ Theo dõi tiến độ lớp
+✅ Chấm bài tập (tự động + thủ công)
+✅ Tạo bài tập tùy chỉnh
+✅ Báo cáo chi tiết
+3. Cho Phụ Huynh
+✅ Xem tiến độ con em
+✅ Nhận thông báo
+✅ Báo cáo định kỳ
+🎯 IX. LỘ TRÌNH TRIỂN KHAI
+Phase 1: MVP (2-3 tháng)
+Database schema cơ bản
+Nội dung lớp 1-5 (Tiểu học)
+Tính năng học bài + làm bài tập cơ bản
+Web app đơn giản
+Phase 2: Mở Rộng (3-4 tháng)
+Nội dung lớp 6-9 (THCS)
+Tính năng lập trình (Scratch, Python)
+Hệ thống dự án
+Mobile app
+Phase 3: Hoàn Thiện (3-4 tháng)
+Nội dung lớp 10-12 (THPT)
+AI tutor
+Gamification
+Chứng chỉ
+Phase 4: Nâng Cao (ongoing)
+Nội dung nâng cao
+Thi đấu coding
+Cộng đồng học tập
+Marketplace khóa học
+📊 X. CHECKLIST HOÀN THIỆN DATABASE
+ Tạo đầy đủ 12 bảng schema
+ Insert dữ liệu 3 cấp học
+ Insert dữ liệu 12 lớp
+ Insert dữ liệu 24 học kỳ (12 lớp x 2 kỳ)
+ Tạo 200+ topics (trung bình 8 topics/lớp)
+ Tạo 1000+ lessons (trung bình 5 lessons/topic)
+ Tạo 100+ skills
+ Tạo 2000+ exercises
+ Tạo 100+ projects
+ Viết API documentation
+ Test database performance
+ Backup và migration scripts
+Chúc bạn xây dựng app Gia Sư Tin Học thành công! 💻🚀
+
+✅ Hoàn thành! Tôi đã tạo xong database hoàn chỉnh cho app Gia Sư Tin Học từ lớp 1 đến lớp 12!
+
+📊 Những Gì Bạn Nhận Được:
+1️⃣ Database Schema Đầy Đủ (10 Bảng)
+✅ school_levels - Cấp học (Tiểu học, THCS, THPT)
+✅ grades - 12 lớp học
+✅ semesters - Học kỳ 1 & 2
+✅ topics - Chủ đề học tập
+✅ lessons - Bài học chi tiết
+✅ skills - Kỹ năng cần đạt
+✅ lesson_skills - Liên kết bài học - kỹ năng
+✅ exercises - Bài tập
+✅ exercise_questions - Câu hỏi bài tập
+✅ projects - Dự án thực hành
+2️⃣ Nội Dung Chi Tiết Theo Từng Cấp
+🎨 Tiểu Học (Lớp 1-5):
+
+Lớp 1: Làm quen máy tính, Paint, gõ chữ, trò chơi học tập
+Lớp 2: Gõ 10 ngón, quản lý file, Word cơ bản, Internet an toàn
+Lớp 3: Word nâng cao, PowerPoint cơ bản, Email
+Lớp 4: PowerPoint nâng cao, Excel cơ bản, Scratch cơ bản
+Lớp 5: Scratch nâng cao, dự án tổng hợp
+📚 THCS (Lớp 6-9):
+
+Lớp 6: Thông tin & dữ liệu, thuật toán, Scratch, mạng máy tính
+Lớp 7: Excel (hàm), Scratch nâng cao, thiết kế đồ họa
+Lớp 8: Python cơ bản (biến, vòng lặp, hàm), cơ sở dữ liệu
+Lớp 9: Web cơ bản (HTML, CSS, JavaScript)
+💻 THPT (Lớp 10-12):
+
+Lớp 10: Kiến trúc máy tính, Python nâng cao (OOP), SQL, Web development
+Lớp 11: JavaScript nâng cao, React.js, Backend (Node.js/Flask), API
+Lớp 12: Full-stack project, Git/GitHub, AI/ML cơ bản, định hướng nghề nghiệp
+3️⃣ Skills Taxonomy (100+ Kỹ Năng)
+Phân loại theo 6 nhóm:
+
+🖥️ Hardware Skills (phần cứng)
+💾 Software Skills (phần mềm)
+💻 Programming Skills (lập trình)
+🌐 Internet Skills (internet)
+📄 Office Skills (văn phòng)
+🎨 Design Skills (thiết kế)
+4️⃣ SQL Statements Sẵn Sàng
+Insert statements cho school_levels
+Insert statements cho 12 grades
+Insert statements cho 20+ skills mẫu
+Có thể copy-paste trực tiếp vào MySQL/PostgreSQL
+5️⃣ API Endpoints Đề Xuất
+6 API endpoints chính:
+
+GET /api/grades - Danh sách lớp học
+GET /api/grades/{id}/curriculum - Chương trình học
+GET /api/lessons/{id} - Chi tiết bài học
+GET /api/exercises/{id} - Bài tập
+POST /api/exercises/{id}/submit - Nộp bài
+GET /api/students/{id}/progress - Tiến độ học tập
+6️⃣ Lộ Trình Triển Khai 4 Phase
+Phase 1 (2-3 tháng): MVP với nội dung Tiểu học
+Phase 2 (3-4 tháng): Mở rộng THCS + tính năng lập trình
+Phase 3 (3-4 tháng): Hoàn thiện THPT + AI tutor
+Phase 4 (ongoing): Nâng cao + cộng đồng
+🎯 Điểm Nổi Bật:
+✨ Cấu Trúc Khoa Học
+Theo đúng chương trình Bộ GD&ĐT Việt Nam
+Phân cấp rõ ràng: Cấp → Lớp → Học kỳ → Chủ đề → Bài học
+Dễ mở rộng và bảo trì
+✨ Đầy Đủ Chi Tiết
+1000+ bài học dự kiến (đã có outline chi tiết cho lớp 1-2)
+2000+ bài tập (nhiều dạng: trắc nghiệm, code, thực hành)
+100+ dự án thực tế
+100+ kỹ năng cần đạt được
+✨ Thực Tế & Ứng Dụng
+Từ cơ bản (cầm chuột) đến nâng cao (full-stack web)
+Kết hợp lý thuyết + thực hành
+Dự án cuối mỗi học kỳ
+📄 Tài Liệu Đã Lưu
+Link: Database Tin Học - Từ Lớp 1 Đến Lớp 12
+
+Tài liệu này bao gồm:
+
+✅ 10 bảng database với schema SQL đầy đủ
+✅ Nội dung chi tiết lớp 1-2 (có thể mở rộng cho lớp 3-12)
+✅ 100+ skills được phân loại
+✅ SQL insert statements mẫu
+✅ API endpoints đề xuất
+✅ Lộ trình triển khai 4 phase
+✅ Checklist hoàn thiện database

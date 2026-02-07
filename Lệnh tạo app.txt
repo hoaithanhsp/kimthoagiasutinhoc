@@ -1,0 +1,96 @@
+# 📝 YÊU CẦU PHÁT TRIỂN ỨNG DỤNG WEB: GIA SƯ TIN HỌC PRO - Trợ lý học tập môn Tin học thông minh
+
+## I. TỔNG QUAN DỰ ÁN
+
+-   **Tên ứng dụng:** GIA SƯ TIN HỌC PRO
+-   **Tác giả:** Trần Thị Kim Thoa - THPT Hoàng Diệu
+-   **Thể loại:** Educational Technology (EdTech) - Ứng dụng hỗ trợ học tập môn Tin học
+-   **Mục đích chính:** Xây dựng nền tảng web Single-Page Application (SPA) giúp học sinh từ lớp 1 đến lớp 12 ôn tập, củng cố kiến thức và phát triển kỹ năng Tin học thông qua hệ thống câu hỏi trắc nghiệm thông minh và trợ lý ảo AI.
+-   **Đối tượng người dùng:** Học sinh phổ thông (Tiểu học, THCS, THPT) và giáo viên Tin học.
+-   **Công nghệ yêu cầu:**
+    *   **Framework:** React 19 với TypeScript
+    *   **Build tool:** Vite
+    *   **Giao diện:** TailwindCSS + Lucide Icons
+    *   **AI Engine:** Google Gemini API (cho tạo câu hỏi và giải đáp thắc mắc)
+    *   **Lưu trữ:** LocalStorage (History, Settings)
+
+-   **Các tính năng chính:**
+    *   ✅ **Hệ thống chương trình chuẩn:** Cập nhật theo chương trình GDPT môn Tin học từ lớp 1-12.
+    *   ✅ **AI Question Generator:** Tự động tạo câu hỏi trắc nghiệm theo chủ đề và độ khó (Nhận biết, Thông hiểu, Vận dụng).
+    *   ✅ **AI Chat Tutor (Thầy Tin AI):** Trợ lý ảo giải đáp thắc mắc, hỗ trợ giải bài tập 24/7.
+    *   ✅ **OCR (Nhận diện hình ảnh):** Cho phép chụp ảnh đề bài để AI giải và hướng dẫn.
+    *   ✅ **Lộ trình học tập cá nhân hóa:** Theo dõi tiến độ và lịch sử làm bài.
+    *   ✅ **Giao diện thân thiện:** Thiết kế hiện đại, phù hợp với từng cấp học (Tiểu học vui nhộn, THPT chuyên nghiệp).
+    *   ✅ **Bảo mật:** Màn hình đăng nhập tài khoản.
+
+---
+
+## II. LUỒNG HOẠT ĐỘNG (USER FLOW)
+
+### Bước 1: Đăng nhập
+- Người dùng đăng nhập với tài khoản được cấp (User: Trần Thị Kim Thoa).
+- Hệ thống xác thực và chuyển vào màn hình chính.
+
+### Bước 2: Chọn chương trình học
+- Học sinh chọn Cấp học (Tiểu học, THCS, THPT).
+- Chọn Lớp (1-12) và Chủ đề bài học tương ứng.
+- Có thể nhập chủ đề tự do để AI tạo nội dung theo yêu cầu.
+
+### Bước 3: Ôn tập và Kiểm tra
+- Hệ thống sinh ra bộ câu hỏi trắc nghiệm (mặc định 20 câu).
+- Học sinh làm bài, chọn đáp án A/B/C/D.
+- Nhận phản hồi ngay lập tức (Đúng/Sai) kèm giải thích chi tiết từ AI.
+
+### Bước 4: Xem kết quả và Lịch sử
+- Hiển thị điểm số, thời gian làm bài.
+- Lưu kết quả vào Lịch sử để theo dõi sự tiến bộ.
+- Có thể xem lại các bài đã làm.
+
+### Bước 5: Hỏi đáp với Thầy Tin AI
+- Sử dụng Chat Widget để đặt câu hỏi thêm.
+- Upload ảnh bài tập khó để được hướng dẫn giải.
+
+---
+
+## III. CẤU TRÚC CHỨC NĂNG CHI TIẾT
+
+### A. MODULE ĐĂNG NHẬP (LoginScreen)
+-   **Mô tả:** Màn hình chào mừng và đăng nhập.
+-   **Chức năng:** Form đăng nhập an toàn, hiển thị thông tin giáo viên/tác giả.
+
+### B. MODULE CHƯƠNG TRÌNH HỌC (Curriculum Manager)
+-   **Mô tả:** Quản lý dữ liệu môn Tin học.
+-   **Dữ liệu:**
+    - Tiểu học: Làm quen máy tính, Paint, Word, Internet.
+    - THCS: Office nâng cao, Pascal/Python cơ bản, Thuật toán.
+    - THPT: Python, C++, SQL, Hệ thống máy tính, ICT.
+
+### C. MODULE AI ENGINE (geminiService)
+-   **Mô tả:** Trái tim của ứng dụng.
+-   **Chức năng:**
+    - Prompt Engineering chuyên sâu cho môn Tin học.
+    - Tạo câu hỏi đa dạng: Lý thuyết, Code, Tư duy logic.
+    - Giải thích cặn kẽ, dễ hiểu.
+
+### D. MODULE CHAT & OCR (ChatWidget)
+-   **Mô tả:** Trợ lý ảo thông minh.
+-   **Chức năng:**
+    - Chat text: Trả lời câu hỏi tự nhiên.
+    - Vision: Phân tích ảnh chụp màn hình code hoặc đề bài giấy.
+
+---
+
+## IV. YÊU CẦU GIAO DIỆN
+
+-   **Màu sắc chủ đạo:**
+    -   Tiểu học: Xanh lá/Vàng (Vui tươi)
+    -   THCS: Xanh dương (Năng động)
+    -   THPT: Cam/Tím (Sáng tạo, Chuyên sâu)
+-   **Phong cách:** Glassmorphism, Clean UI.
+-   **Responsive:** Tối ưu hoàn hảo cho cả PC và Mobile/Tablet.
+
+---
+
+## V. KẾT LUẬN
+
+GIA SƯ TIN HỌC PRO là giải pháp chuyển đổi số toàn diện cho việc dạy và học Tin học, mang lại trải nghiệm học tập chủ động, thú vị và hiệu quả cao nhờ sức mạnh của trí tuệ nhân tạo.
