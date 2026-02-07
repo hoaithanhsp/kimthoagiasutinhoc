@@ -443,7 +443,7 @@ const App: React.FC = () => {
           <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100">
             <div className="flex items-center gap-6">
               <img
-                src="/GV/avatar.jpg"
+                src="/avatar.jpg"
                 alt="Avatar giáo viên"
                 className="w-24 h-24 md:w-28 md:h-28 rounded-2xl object-cover border-4 border-blue-100 shadow-lg"
                 onError={(e) => {
