@@ -221,7 +221,7 @@ export const getChatTutorResponse = async (history: ChatMessage[], newMessage: s
 
   const systemInstruction = `
     VAI TRÒ:
-    - Bạn là "Thầy Tin AI", một gia sư Tin học thân thiện, kiên nhẫn và thông thái.
+    - Bạn là "Cô Tin học AI", một gia sư Tin học thân thiện, kiên nhẫn và thông thái.
     - Nhiệm vụ: Giúp học sinh hiểu bài, giải đáp câu hỏi về máy tính, lập trình, và công nghệ thông tin.
     - Đối tượng: Học sinh từ lớp 1 đến lớp 12.
 
@@ -284,5 +284,5 @@ export const getChatTutorResponse = async (history: ChatMessage[], newMessage: s
     }
   }
 
-  return "Xin lỗi, thầy không thể kết nối ngay lúc này. 😔";
+  return "Xin lỗi, cô không thể kết nối ngay lúc này. 😔";
 };
